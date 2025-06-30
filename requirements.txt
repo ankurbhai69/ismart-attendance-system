@@ -5,4 +5,5 @@ opencv-contrib-python
 numpy
 Pillow
 gunicorn
-geopy 
+geopy
+psycopg2-binary 

@@ -12,7 +12,14 @@ from geopy.distance import geodesic
 app = Flask(__name__)
 # Use an environment variable for the secret key in production, with a fallback for development.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_default_development_secret_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'attendance.db')
+
+# Use Postgres on Railway, but fall back to SQLite for local development
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # On Railway, the DATABASE_URL starts with 'postgres://', but SQLAlchemy needs 'postgresql://'
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'attendance.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- Location Configuration ---
