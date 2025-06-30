@@ -10,7 +10,8 @@ from datetime import date, datetime
 from geopy.distance import geodesic
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
+# Use an environment variable for the secret key in production, with a fallback for development.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_default_development_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'attendance.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
