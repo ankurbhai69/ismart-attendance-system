@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to iSmart Class</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="landing-overlay"></div>
+        <div class="landing-content">
+            <h1 class="display-3">iSmart Attendance</h1>
+            <p class="lead">The future of attendance tracking is here. Modern, seamless, and secure.</p>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.5);">
+            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">Proceed to Portal</a>
+        </div>
+    </div>
+</body>
+</html> 

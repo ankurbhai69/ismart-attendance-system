@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+
+{% block title %}Admin Dashboard - iSmart Attendance{% endblock %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+<hr>
+
+<h3>Institution Location Settings</h3>
+<div class="card mb-4">
+    <div class="card-body">
+        <p>Set the coordinates for the center of your institution's location. You can enter them manually or use your current location.</p>
+        <form action="{{ url_for('update_settings') }}" method="POST">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" value="{{ latitude }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" value="{{ longitude }}" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Location</button>
+            <button type="button" id="get-location" class="btn btn-secondary ml-2">Use My Current Location</button>
+        </form>
+    </div>
+</div>
+
+<h3>Students</h3>
+<a href="{{ url_for('add_student') }}" class="btn btn-primary mb-3">Add New Student</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th class="text-right">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.id }}</td>
+            <td>{{ student.name }}</td>
+            <td class="text-right">
+                <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this student and all associated attendance records?');" style="display: inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h3>Attendance Records</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Student Name</th>
+            <th>Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in attendance %}
+        <tr>
+            <td>{{ record.id }}</td>
+            <td>{{ record.student.name }}</td>
+            <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('get-location').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+                alert('Location fetched successfully!');
+            }, (error) => {
+                alert('Could not get your location. Please ensure you have granted location permissions.');
+                console.error("Geolocation error: ", error);
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+</script>
+{% endblock %} 

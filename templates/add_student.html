@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add Student - iSmart Attendance{% endblock %}
+
+{% block content %}
+<h2>Add New Student</h2>
+<p>Position the student's face in the camera frame, enter their name, and click "Add Student" to instantly capture and register them.</p>
+<div class="row">
+    <div class="col-md-6">
+        <video id="video" width="100%" height="auto" autoplay class="mb-2" style="border-radius: 5px;"></video>
+        <div class="mt-2">
+            <label>Photo Preview:</label>
+            <img id="photo-preview" src="" alt="Live capture will appear here." style="width: 100%; border-radius: 5px; border: 1px solid #ddd; min-height: 200px; display: none;">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <form id="student-form" method="POST" action="{{ url_for('add_student') }}">
+            <div class="form-group">
+                <label for="name">Student Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <input type="hidden" id="image_data" name="image_data">
+            <canvas id="canvas" style="display:none;"></canvas>
+            <button type="button" id="add-student-btn" class="btn btn-success btn-block">Add Student</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const video = document.getElementById('video');
+    const addStudentButton = document.getElementById('add-student-btn');
+    const canvas = document.getElementById('canvas');
+    const imageDataInput = document.getElementById('image_data');
+    const studentForm = document.getElementById('student-form');
+    const photoPreview = document.getElementById('photo-preview');
+    const studentNameInput = document.getElementById('name');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error("Error accessing camera: ", err);
+            alert('Could not access the camera. Please allow camera access and try again.');
+        });
+
+    addStudentButton.addEventListener('click', () => {
+        if (!studentNameInput.value.trim()) {
+            alert('Please enter a student name before adding.');
+            studentNameInput.focus();
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        
+        let dataUrl = canvas.toDataURL('image/jpeg');
+        imageDataInput.value = dataUrl;
+        photoPreview.src = dataUrl;
+        photoPreview.style.display = 'block';
+
+        // A small delay to allow the user to see the captured image before submitting
+        setTimeout(() => {
+            studentForm.submit();
+        }, 500);
+    });
+</script>
+{% endblock %} 

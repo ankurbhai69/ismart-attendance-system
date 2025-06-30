@@ -1,0 +1,154 @@
+{% extends 'layout.html' %}
+
+{% block title %}Mark Attendance - iSmart Attendance{% endblock %}
+
+{% block content %}
+<style>
+    #video-container {
+        position: relative;
+        width: 100%;
+        max-width: 720px;
+        margin: auto;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    #status-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: center;
+        color: white;
+        background-color: rgba(0,0,0,0.6);
+        transition: background-color 0.5s;
+    }
+    .status-searching { background-color: rgba(0,0,0,0.6); }
+    .status-success { background-color: #28a745; }
+    .status-failure { background-color: #dc3545; }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-10 text-center">
+        <h2>Live Attendance</h2>
+        <p>Position your face in the camera frame. The system will automatically detect and mark your attendance.</p>
+        <div id="video-container">
+            <video id="video" width="100%" height="auto" autoplay muted playsinline></video>
+            <div id="status-bar" class="status-searching">Searching for face...</div>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const statusBar = document.getElementById('status-bar');
+    
+    let userLatitude, userLongitude;
+    let isProcessing = false;
+    let recognitionInterval;
+
+    // 1. Get location first
+    function getLocation() {
+        if (!navigator.geolocation) {
+            updateStatus('Geolocation is not supported.', 'failure');
+            return;
+        }
+        updateStatus('Getting your location...', 'searching');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                userLatitude = position.coords.latitude;
+                userLongitude = position.coords.longitude;
+                startCamera();
+            }, 
+            () => {
+                updateStatus('Location access denied. Cannot proceed.', 'failure');
+            }
+        );
+    }
+
+    // 2. Start the camera feed
+    function startCamera() {
+        updateStatus('Starting camera...', 'searching');
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    updateStatus('Scanning for face...', 'searching');
+                    recognitionInterval = setInterval(recognizeFace, 2000); // Scan every 2 seconds
+                };
+            })
+            .catch(() => {
+                updateStatus('Camera access denied. Cannot proceed.', 'failure');
+            });
+    }
+
+    // 3. Continuously recognize face
+    function recognizeFace() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        fetch('/api/recognize_and_attend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                image_data: imageData,
+                latitude: userLatitude,
+                longitude: userLongitude
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            handleApiResponse(data);
+            isProcessing = false;
+        })
+        .catch(() => {
+            // Network or server error, just keep trying
+            isProcessing = false;
+        });
+    }
+
+    // 4. Handle the API response
+    function handleApiResponse(data) {
+        if (data.status === 'success') {
+            clearInterval(recognitionInterval); // Stop scanning
+            let message = `Welcome, ${data.name}! Attendance marked.`;
+            if(data.reason === 'already_marked') {
+                message = `Hi, ${data.name}! Your attendance for today is already marked.`;
+            }
+            updateStatus(message, 'success');
+            setTimeout(() => window.location.href = "{{ url_for('home') }}", 4000); // Redirect after 4s
+        } else if (data.status === 'failure') {
+            if (data.reason === 'out_of_range') {
+                clearInterval(recognitionInterval);
+                updateStatus('You are too far from the institution.', 'failure');
+            } else {
+                // For 'no_face' or 'not_recognized', just keep scanning silently
+                updateStatus('Scanning for face...', 'searching');
+            }
+        } else if (data.status === 'error') {
+            clearInterval(recognitionInterval);
+            updateStatus(`Error: ${data.message}`, 'failure');
+        }
+    }
+
+    function updateStatus(message, statusType) {
+        statusBar.textContent = message;
+        statusBar.className = 'status-bar';
+        statusBar.classList.add(`status-${statusType}`);
+    }
+
+    // Start the whole process on page load
+    document.addEventListener('DOMContentLoaded', getLocation);
+</script>
+{% endblock %} 

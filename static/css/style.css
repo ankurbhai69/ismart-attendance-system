@@ -1,0 +1,94 @@
+/* General UI Improvements */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6;
+}
+
+.navbar {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.jumbotron {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.btn {
+    border-radius: 50px;
+    padding: 10px 30px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #6a11cb;
+    border-color: #6a11cb;
+    box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+}
+
+.btn-primary:hover {
+    background-color: #5a0eb5;
+    border-color: #5a0eb5;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 17, 203, 0.5);
+}
+
+.table {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.table thead {
+    background-color: #343a40;
+    color: white;
+}
+
+/* Landing Page Styles */
+.landing-container {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+.landing-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop') no-repeat center center/cover;
+    z-index: -2;
+}
+
+.landing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(4, 30, 61, 0.7); /* A darker, blue-ish overlay */
+    z-index: -1;
+}
+
+.landing-content h1 {
+    font-weight: 700;
+    font-size: 4.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+}
+.landing-content .lead {
+    font-size: 1.5rem;
+    font-weight: 300;
+} 

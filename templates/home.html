@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Welcome - iSmart Attendance{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to iSmart Class Attendance</h1>
+    <p class="lead">A modern, facial recognition-based attendance system.</p>
+    <hr class="my-4">
+    <p>Mark your attendance quickly and securely using our state-of-the-art facial recognition technology.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('take_attendance_page') }}" role="button">Mark Attendance</a>
+</div>
+{% endblock %} 
